@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  /* تعريف ألوان مشروع IMB */
+  --color-primary: #1b3d4e;
+  --color-primary-light: #2c5d75;
+  --color-primary-dark: #112833;
+  
+  --color-accent: #c5a059;
+  --color-accent-hover: #b08d45;
+
+  /* تعريف الخط (تأكد من استيراده في layout.js) */
+  --font-cairo: "Cairo", sans-serif;
+  
+  /* إعدادات الشاشات (اختياري، لأنها موجودة افتراضياً) */
+  --breakpoint-xs: 30rem;
+  --breakpoint-2xl: 100rem;
+}
+
+/* إخفاء شريط التمرير مع الحفاظ على وظيفته */
+.no-scrollbar::-webkit-scrollbar {
+    display: none !important;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none !important;  /* IE and Edge */
+    scrollbar-width: none !important;  /* Firefox */
+}
+
+.zbi{
+  z-index: 100000000000000000000000 !important;
+}
