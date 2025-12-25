@@ -10,6 +10,14 @@ const cairo = Cairo({ subsets: ['arabic'], weight: ['400', '600', '700', '900'] 
 export const metadata = {
   title: 'IMB العقارية | استثمار، بيع، وكراء العقارات في الجزائر',
   description: 'المنصة الجزائرية الأولى للاستثمار العقاري الآمن وبيع وشراء العقارات الموثقة.',
+  icons: {
+            icon: 'https://i.ibb.co/zHQ5bkDr/logo.png',
+        },
+        openGraph: {
+           title: 'IMB العقارية | استثمار، بيع، وكراء العقارات في الجزائر',
+  description: 'المنصة الجزائرية الأولى للاستثمار العقاري الآمن وبيع وشراء العقارات الموثقة.',
+            images: ['https://i.ibb.co/zHQ5bkDr/logo.png'],
+        },
 };
 
 export default function RootLayout({ children }) {

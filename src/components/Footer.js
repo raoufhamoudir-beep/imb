@@ -1,6 +1,7 @@
 // components/Footer.jsx
 import Link from 'next/link';
 import { MapPin, Phone, Mail, Facebook, Instagram, Linkedin } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Footer() {
     return (
@@ -10,8 +11,13 @@ export default function Footer() {
                     {/* Brand Info */}
                     <div className="md:col-span-1">
                         <Link href="/" className="text-3xl font-black text-white tracking-wide block mb-6">
-                            IMB<span className="text-accent">.DZ</span>
-                        </Link>
+<Image
+className='w-16 h-16'
+src={'/logo.png'} 
+alt='logo_imb'
+width={50}
+height={50}
+/>                        </Link>
                         <p className="text-gray-400 text-sm leading-relaxed mb-6">
                             نحن نعيد تعريف مفهوم العقار في الجزائر من خلال المصداقية، الشفافية، والحلول الاستثمارية المبتكرة.
                         </p>
@@ -66,7 +72,10 @@ export default function Footer() {
 
                 <div className="text-center text-gray-500 text-sm flex flex-col md:flex-row justify-between items-center">
                     <p>© {new Date().getFullYear()} IMB Real Estate. جميع الحقوق محفوظة.</p>
-                    <p className="mt-2 md:mt-0">Design by <span className="text-white font-semibold">YourName</span></p>
+                    <p className="mt-2 md:mt-0">Design by <a
+                    href="https://wa.me/213776966468"
+                    target='_blank'
+                    className="text-accent font-semibold">#raouf_Hamoudi</a></p>
                 </div>
             </div>
         </footer>

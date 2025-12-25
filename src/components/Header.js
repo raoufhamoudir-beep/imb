@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Menu, X, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
+import Image from 'next/image';
 
 export default function Header() {
     const [scrolled, setScrolled] = useState(false);
@@ -33,7 +34,13 @@ export default function Header() {
             <div className="container mx-auto px-6 flex justify-between items-center">
                 {/* Logo */}
                 <Link href="/" className="text-3xl font-black text-white tracking-wide">
-                    IMB<span className="text-accent">.DZ</span>
+<Image
+className='w-12 h-12'
+src={'/logo.png'} 
+alt='logo_imb'
+width={50}
+height={50}
+/>
                 </Link>
 
                 {/* Desktop Nav */}
