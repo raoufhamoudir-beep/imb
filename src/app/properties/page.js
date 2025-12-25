@@ -71,7 +71,6 @@ async function getProperties(filters) {
     }
 
     // طباعة الكويري في التيرمينال للتأكد (Debug)
-    console.log("Final Mongoose Query:", JSON.stringify(query, null, 2));
 
     const properties = await Property.find(query).sort({ createdAt: -1 }).lean();
 

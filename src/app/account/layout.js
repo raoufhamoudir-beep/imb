@@ -22,6 +22,7 @@ export default function AccountLayout({ children }) {
     const menuItems = [
         { name: 'إعدادات الحساب', icon: <Settings size={20} />, href: '/account' },
         { name: 'عقاراتي', icon: <Building size={20} />, href: '/account/my-properties' },
+        { name: 'عروضي الاستتمارية', icon: <Building size={20} />, href: '/account/my-investment' },
         { name: 'إضافة عقار', icon: <PlusCircle size={20} />, href: '/account/add-property' },
         { name: 'إضافة استتمار', icon: <PlusCircle size={20} />, href: '/account/add-investment' },
         { name: 'نظام المسوق', icon: <Share2 size={20} />, href: '/account/marketing' },

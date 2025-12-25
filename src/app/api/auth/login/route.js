@@ -22,9 +22,9 @@ export async function POST(request) {
         if (!isMatch) {
             return NextResponse.json({ message: 'بيانات الدخول غير صحيحة' }, { status: 400 });
         }
-
+ 
         // 3. إنشاء التوكن (JWT)
-        const secret = process.env.JWT_SECRET || 'imb-secret-key-change-this';
+        const secret = process.env.JWT_SECRET;
         const token = jwt.sign(
             { userId: user._id, email: user.email, role: user.role, name: user.name },
             secret,
@@ -39,8 +39,7 @@ export async function POST(request) {
             sameSite: 'strict',
             maxAge: 60 * 60 * 24 * 7, // 7 أيام
             path: '/',
-        });
-
+        });     
         return NextResponse.json({
             message: 'تم تسجيل الدخول بنجاح',
             user: { id: user._id, name: user.name, email: user.email, role: user.role }

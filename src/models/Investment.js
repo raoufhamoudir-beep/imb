@@ -9,6 +9,10 @@ const InvestmentSchema = new mongoose.Schema({
     images: [], // يمكنك تحديدها كـ [String] لتعريف أدق
     projectStatus: String,
     revenueModel: String,
+    currentPhase: { 
+        type: Number, 
+        default: 0 
+    },
     projectType: String,
     minInvestment: String, // أقل مبلغ للدخول
     totalTarget: String, // المبلغ الإجمالي المطلوب

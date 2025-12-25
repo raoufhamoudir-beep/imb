@@ -7,7 +7,7 @@ import Investment from '@/models/Investment';
 export async function GET(request) {
     try {
         await connectDB();
-        const properties = await Investment.find().sort({ createdAt: -1 }).limit(6); // الأحدث أولاً
+        const properties = await Investment.find().sort({ createdAt: -1 }); // الأحدث أولاً
         return NextResponse.json(properties, { status: 200 });
     } catch (error) {
         console.error('Database Error:', error);
@@ -63,9 +63,9 @@ export async function DELETE(request) {
         if (!deletedProperty) {
             return NextResponse.json({ message: 'العقار غير موجود' }, { status: 404 });
         }
-
+ 
         // مسح الكاش لإزالة العقار من القوائم المعروضة فوراً
-        revalidateTag('properties-list');
+        revalidateTag('Investment-list');
 
         return NextResponse.json(
             { message: 'تم حذف العقار بنجاح' },

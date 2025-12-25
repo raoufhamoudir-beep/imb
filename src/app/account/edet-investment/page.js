@@ -1,36 +1,43 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react'; // Added Suspense
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    MapPin, Wallet,
-    Check, ChevronRight, ChevronLeft, Upload, X,
-    Clock, Target, Building, Coins,
-    Loader2
+    MapPin, Home, DollarSign, Image as ImageIcon,
+    Check, ChevronRight, ChevronLeft, Upload, X, Shield, Car, Trees, Wifi,
+    Loader2,
+    Target, Wallet ,Building ,Coins, Clock 
 } from 'lucide-react';
 import handleImageUpload from '@/utility/UploadImages';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import axios from 'axios';
 
-export default function AddInvestmentPage() {
-    const router = useRouter();
-    const [step, setStep] = useState(1);
+// ... (SUGGESTED_FEATURES remains the same) ...
+
+
+function EditeinvestmentForm() { // Renamed mainly to wrap in Suspense later
+    const searchParams = useSearchParams();
     const { user } = useAuth();
+    const id = searchParams.get('id');
+    const router = useRouter();
 
-    // Loading states
+    const [step, setStep] = useState(1);
+
+    // --- Loading States ---
+    const [loading, setLoading] = useState(true); // Fixed: Added loading state
     const [submitting, setSubmitting] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
-
     const [err, setErr] = useState("");
 
-    const [formData, setFormData] = useState({
+    // --- Form Data ---
+   const [formData, setFormData] = useState({
         // Step 1: Basic Info
         title: '',
         description: '',
         address: '',
         city: '',
         state: '',
-        currentPhase: 0, // القيمة الافتراضية
         // Step 2: Investment Details
         projectStatus: 'planning',
         revenueModel: 'one_shot',
@@ -47,18 +54,47 @@ export default function AddInvestmentPage() {
         // Step 3: Images
         images: []
     });
-const PHASES = [
-  { id: 0, title: 'دراسة الجدوى والاستحواذ', desc: 'المشروع في مرحلة التخطيط وشراء الأرض' },
-  { id: 1, title: 'التراخيص والمخططات', desc: 'جاري استخراج رخص البناء والموافقات' },
-  { id: 2, title: 'الأشغال الكبرى (Gros Œuvre)', desc: 'البناء، الأساسات، والهيكل الخرساني' },
-  { id: 3, title: 'التشطيبات النهائية', desc: 'الكهرباء، الطلاء، والترصيص' },
-  { id: 4, title: 'التسليم وتوزيع الأرباح', desc: 'المشروع مكتمل وجاري البيع/التأجير' },
-];
+
+    // --- THE FIXED USE EFFECT ---
+    useEffect(() => {
+        const fetchPropertyData = async () => {
+            if (!id) return;
+
+            setLoading(true);
+            try {
+                // Fetch using Axios as imported
+                const res = await axios.get(`/api/oneinvestment/?id=${id}`);
+
+                // Ensure we merge the data correctly. 
+                // We spread the response data into existing form structure
+                if (res.data) {
+                    setFormData(prev => ({
+                        ...prev,
+                        ...res.data,
+                        // Ensure nested objects or arrays are handled if API returns nulls
+                        images: res.data.images || []
+                    }));
+                }
+            } catch (error) {
+                console.error("Error fetching properties:", error);
+                setErr("فشل في تحميل بيانات العقار");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPropertyData();
+    }, [id]); // Fixed: Added id dependency
+
+    // Control changes
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    // Toggle Featur
+
+    // Handle File Select
     const handleFileSelect = async (e) => {
         const files = Array.from(e.target.files);
         if (!files.length) return;
@@ -67,38 +103,32 @@ const PHASES = [
         setErr("");
 
         try {
-            // Upload all selected files in parallel
             const uploadPromises = files.map(file => handleImageUpload(file));
             const uploadedUrls = await Promise.all(uploadPromises);
-
-            // Filter out any nulls if an upload failed silently
             const validUrls = uploadedUrls.filter(url => url !== null);
 
             setFormData(prev => ({
                 ...prev,
                 images: [...prev.images, ...validUrls]
             }));
-
         } catch (error) {
             console.error("Upload failed", error);
-            setErr("حدث خطأ أثناء رفع الصور، يرجى المحاولة مرة أخرى.");
+            setErr("حدث خطأ أثناء رفع الصور");
         } finally {
             setIsUploading(false);
-            e.target.value = ""; // Reset input
+            e.target.value = "";
         }
     };
 
-    const removeImage = (indexToRemove) => {
-        setFormData(prev => ({
-            ...prev,
-            images: prev.images.filter((_, i) => i !== indexToRemove)
-        }));
+    const removeImage = (index) => {
+        setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
     };
 
     const nextStep = () => setStep(prev => Math.min(prev + 1, 3));
     const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
 
-    const handlePostInvestment = async () => {
+    // Handle Edit Submit
+    const handleEdetInvestment = async () => {
         if (formData.images.length === 0) {
             setErr("يرجى إضافة صورة واحدة على الأقل");
             return;
@@ -108,8 +138,10 @@ const PHASES = [
         setErr("");
 
         try {
-            const res = await fetch('/api/investment', {
-                method: 'POST',
+            // Note: Your fetch here uses /api/my-properties, but GET uses /api/property
+            // Ensure this endpoint matches your backend route for updates
+            const res = await fetch(`/api/my-investment?id=${id}`, {
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
             });
@@ -128,28 +160,33 @@ const PHASES = [
         }
     };
 
-    // Progress Bar Component
+    // Progress Steps Component
     const ProgressSteps = () => (
-        <div className="flex justify-between items-center mb-10 relative" dir="rtl">
+        <div className="flex justify-between items-center mb-10 relative">
             <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 rounded-full"></div>
-            <div
-                className="absolute top-1/2 right-0 h-1 bg-accent -z-10 rounded-full transition-all duration-500"
-                style={{ width: `${((step - 1) / 2) * 100}%` }}
-            ></div>
-
+            <div className="absolute top-1/2 left-0 h-1 bg-accent -z-10 rounded-full transition-all duration-500" style={{ width: `${((step - 1) / 2) * 100}%` }}></div>
             {[1, 2, 3].map((num) => (
-                <div key={num} className="flex flex-col items-center gap-2 bg-gray-50 px-2 z-0">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${step >= num ? 'bg-accent text-white shadow-lg scale-110' : 'bg-gray-200 text-gray-500'
-                        }`}>
+                <div key={num} className={`flex flex-col items-center gap-2 bg-gray-50 px-2`}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${step >= num ? 'bg-accent text-white shadow-lg scale-110' : 'bg-gray-200 text-gray-500'}`}>
                         {num}
                     </div>
                     <span className={`text-xs font-bold ${step >= num ? 'text-primary' : 'text-gray-400'}`}>
-                        {num === 1 ? 'المشروع' : num === 2 ? 'المالية' : 'الوسائط'}
+                        {num === 1 ? 'المعلومات' : num === 2 ? 'التفاصيل' : 'الصور'}
                     </span>
                 </div>
             ))}
         </div>
     );
+
+    // --- LOADING VIEW ---
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh]">
+                <Loader2 className="animate-spin text-accent mb-4" size={50} />
+                <p className="text-gray-500 font-bold">جاري تحميل بيانات العقار...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-4xl mx-auto" dir="rtl">
@@ -291,35 +328,7 @@ const PHASES = [
                                         </button>
                                     </div>
                                 </div>
-<div>
-    <label className="block text-sm font-bold text-gray-700 mb-3">المرحلة الحالية للمشروع</label>
-    <div className="space-y-3">
-        {PHASES.map((phase) => (
-            <button
-                key={phase.id}
-                type="button"
-                onClick={() => setFormData({...formData, currentPhase: phase.id})}
-                className={`w-full flex items-center p-4 rounded-xl border text-right transition-all ${
-                    formData.currentPhase === phase.id 
-                    ? 'bg-accent/10 border-accent shadow-md' 
-                    : 'bg-white border-gray-200 hover:bg-gray-50'
-                }`}
-            >
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ml-4 shrink-0 ${
-                    formData.currentPhase === phase.id ? 'border-accent bg-accent text-white' : 'border-gray-300'
-                }`}>
-                    {formData.currentPhase === phase.id && <Check size={14} />}
-                </div>
-                <div>
-                    <h4 className={`font-bold ${formData.currentPhase === phase.id ? 'text-accent' : 'text-gray-800'}`}>
-                        {phase.title}
-                    </h4>
-                    <p className="text-xs text-gray-500">{phase.desc}</p>
-                </div>
-            </button>
-        ))}
-    </div>
-</div>
+
                                 {/* Project Type & Duration */}
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div>
@@ -486,7 +495,7 @@ const PHASES = [
                         ) : (
                             <button
                                 type="button"
-                                onClick={handlePostInvestment}
+                                onClick={handleEdetInvestment}
                                 disabled={submitting || isUploading}
                                 className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
                             >
@@ -498,5 +507,14 @@ const PHASES = [
                 </form>
             </div>
         </div>
+    );
+}
+
+
+export default function Editeinvestment() {
+    return (
+        <Suspense fallback={<div className="flex justify-center items-center h-screen"><Loader2 className="animate-spin" /></div>}>
+            <EditeinvestmentForm />
+        </Suspense>
     );
 }

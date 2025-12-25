@@ -2,15 +2,16 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Save, Lock, User, Loader2 } from 'lucide-react';
+import axios from 'axios';
 
 export default function AccountSettings() {
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState({ type: '', text: '' });
 
     const [formData, setFormData] = useState({
         name: user?.name || '',
-        email: user?.email || '', // للعرض فقط
+        email: user?.email || '', 
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
@@ -18,15 +19,55 @@ export default function AccountSettings() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        setMessage('');
+        setMessage({ type: '', text: '' });
 
-        // محاكاة الاتصال بالـ API لتحديث البيانات
-        setTimeout(() => {
+        // 1. Validation
+        if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
+            setMessage({ type: 'error', text: 'كلمة المرور الجديدة غير متطابقة' });
+            return;
+        }
+
+        if (formData.newPassword && !formData.currentPassword) {
+            setMessage({ type: 'error', text: 'يرجى إدخال كلمة المرور الحالية لتغيير كلمة المرور' });
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            // 2. Prepare Payload
+            const payload = {
+                name: formData.name,
+            };
+
+            // Only send password data if user is trying to change it
+            if (formData.newPassword) {
+                payload.currentPassword = formData.currentPassword;
+                payload.newPassword = formData.newPassword;
+            }
+
+            // 3. API Call
+            await axios.put(`/api/user?id=${user.id}`, payload);
+
+            setMessage({ type: 'success', text: 'تم تحديث البيانات بنجاح!' });
+            
+            // Clear password fields
+            setFormData(prev => ({
+                ...prev,
+                currentPassword: '',
+                newPassword: '',
+                confirmPassword: ''
+            }));
+
+        } catch (error) {
+            console.error(error);
+            setMessage({ 
+                type: 'error', 
+                text: error.response?.data?.message || 'حدث خطأ أثناء التحديث' 
+            });
+        } finally {
             setLoading(false);
-            setMessage('تم تحديث البيانات بنجاح!');
-        }, 1500);
-        // هنا يجب إضافة كود fetch('/api/user/update', ...) لاحقاً
+        }
     };
 
     return (
@@ -36,9 +77,13 @@ export default function AccountSettings() {
                 <p className="text-gray-500">قم بتحديث معلوماتك الشخصية وكلمة المرور.</p>
             </div>
 
-            {message && (
-                <div className="bg-green-50 text-green-700 p-4 rounded-xl mb-6 font-bold text-center border border-green-200">
-                    {message}
+            {message.text && (
+                <div className={`p-4 rounded-xl mb-6 font-bold text-center border ${
+                    message.type === 'success' 
+                    ? 'bg-green-50 text-green-700 border-green-200' 
+                    : 'bg-red-50 text-red-700 border-red-200'
+                }`}>
+                    {message.text}
                 </div>
             )}
 
@@ -82,6 +127,8 @@ export default function AccountSettings() {
                         <input
                             type="password"
                             placeholder="••••••••"
+                            value={formData.currentPassword}
+                            onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
                             className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-accent"
                         />
                     </div>
@@ -92,6 +139,8 @@ export default function AccountSettings() {
                             <input
                                 type="password"
                                 placeholder="••••••••"
+                                value={formData.newPassword}
+                                onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
                                 className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-accent"
                             />
                         </div>
@@ -100,6 +149,8 @@ export default function AccountSettings() {
                             <input
                                 type="password"
                                 placeholder="••••••••"
+                                value={formData.confirmPassword}
+                                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                                 className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-accent"
                             />
                         </div>

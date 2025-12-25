@@ -36,7 +36,6 @@ async function getLatestProperties() {
 
 export default async function Home() {
   const properties = await getLatestProperties();
-  console.log(properties);
 
   return (
     <main className="min-h-screen bg-white">
